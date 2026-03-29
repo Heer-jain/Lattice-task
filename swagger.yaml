@@ -1,0 +1,196 @@
+openapi: 3.0.0
+
+info:
+title: Event Booking API
+description: Backend API for managing events, bookings, and attendance
+version: 1.0.0
+
+servers:
+
+* url: http://localhost:3000
+
+paths:
+
+/events:
+get:
+summary: Get all events
+responses:
+'200':
+description: List of all events
+content:
+application/json:
+schema:
+type: array
+items:
+$ref: '#/components/schemas/Event'
+
+
+post:
+  summary: Create a new event
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - title
+            - date
+            - totalTickets
+          properties:
+            title:
+              type: string
+              example: Music Concert
+            description:
+              type: string
+              example: Live concert event
+            date:
+              type: string
+              format: date
+              example: 2026-05-01
+            totalTickets:
+              type: integer
+              example: 100
+  responses:
+    '201':
+      description: Event created successfully
+
+
+/bookings:
+post:
+summary: Book a ticket
+requestBody:
+required: true
+content:
+application/json:
+schema:
+type: object
+required:
+- userId
+- eventId
+properties:
+userId:
+type: integer
+example: 1
+eventId:
+type: integer
+example: 2
+responses:
+'200':
+description: Booking successful
+content:
+application/json:
+schema:
+type: object
+properties:
+message:
+type: string
+example: Booking successful
+bookingCode:
+type: string
+example: ABC123
+'400':
+description: Booking failed (no tickets or invalid data)
+
+/users/{id}/bookings:
+get:
+summary: Get all bookings for a user
+parameters:
+- name: id
+in: path
+required: true
+schema:
+type: integer
+example: 1
+responses:
+'200':
+description: List of bookings for the user
+content:
+application/json:
+schema:
+type: array
+items:
+$ref: '#/components/schemas/Booking'
+
+/events/{id}/attendance:
+post:
+summary: Verify attendance using booking code
+parameters:
+- name: id
+in: path
+required: true
+schema:
+type: integer
+example: 1
+requestBody:
+required: true
+content:
+application/json:
+schema:
+type: object
+required:
+- bookingCode
+properties:
+bookingCode:
+type: string
+example: ABC123
+responses:
+'200':
+description: Attendance verified
+content:
+application/json:
+schema:
+type: object
+properties:
+ticketsBooked:
+type: integer
+example: 1
+'404':
+description: Invalid booking code
+
+components:
+
+schemas:
+
+
+Event:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    title:
+      type: string
+      example: Music Concert
+    description:
+      type: string
+      example: Live concert event
+    date:
+      type: string
+      example: 2026-05-01
+    totalTickets:
+      type: integer
+      example: 100
+    remainingTickets:
+      type: integer
+      example: 80
+
+Booking:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    userId:
+      type: integer
+      example: 1
+    eventId:
+      type: integer
+      example: 2
+    bookingCode:
+      type: string
+      example: ABC123
+    bookingDate:
+      type: string
+      example: 2026-03-29T10:00:00Z
+
